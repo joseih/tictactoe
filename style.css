@@ -11,7 +11,7 @@ div {
 }
 #container {
   height: 97vh;
-  display: flex;
+  display: grid;
   align-items: center;
   justify-content: center;
 }
@@ -32,4 +32,14 @@ div {
 .gameboard-cell:hover {
   background-color: cornsilk;
   cursor: pointer;
+}
+
+#score {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+}
+#score span {
+  font-size: 30px;
+  color: white;
 }

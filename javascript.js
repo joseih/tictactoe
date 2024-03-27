@@ -1,81 +1,110 @@
 function Player(marker) {
   let score = 0;
+  let scoreSpan = document.getElementById(marker);
+
   return {
     win() {
       score++;
-      this.showScore();
-    },
-    showScore() {
-      console.log(`${marker}: ${score}`);
+      scoreSpan.textContent = marker + ": " + score;
     },
     marker() {
       return marker;
     },
   };
 }
-function GameLogic() {
-  let playerX = Player("X");
-  let playerO = Player("O");
-  let gameBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  let turnn = 0;
-  function win(marker) {
-    if (marker == "X") {
-      playerX.win();
-      return true;
-    } else if (marker == "O") {
-      playerO.win();
-      return true;
-    }
-  }
-  return {
-    gameBoard,
-    play() {
-      if (turnn == 0) {
-        turnn--;
-        return playerX.marker();
-      } else {
-        turnn++;
-        return playerO.marker();
-      }
-    },
-    checkCell(i) {
-      if (gameBoard[0] == gameBoard[1] && gameBoard[1] == gameBoard[2]) {
-        return win(gameBoard[i]);
-      } else if (gameBoard[0] == gameBoard[4] && gameBoard[4] == gameBoard[8]) {
-        return win(gameBoard[i]);
-      } else if (gameBoard[0] == gameBoard[3] && gameBoard[3] == gameBoard[6]) {
-        return win(gameBoard[i]);
-      } else if (gameBoard[3] == gameBoard[4] && gameBoard[4] == gameBoard[5]) {
-        return win(gameBoard[i]);
-      } else if (gameBoard[6] == gameBoard[7] && gameBoard[7] == gameBoard[8]) {
-        return win(gameBoard[i]);
-      } else if (gameBoard[2] == gameBoard[4] && gameBoard[4] == gameBoard[6]) {
-        return win(gameBoard[i]);
-      }
-    },
-  };
-}
 
-let domLogic = (() => {
+function DomLogic() {
   let boardCells = document.querySelectorAll(".gameboard-cell");
-  let gameLogic = GameLogic();
+  let countTurn = 0;
+  let gamelogic = GameLogic();
+
   function addLogicInDOM() {
     for (let i = 0; i < 9; i++) {
       boardCells[i].addEventListener("click", () => {
         if (boardCells[i].textContent == "") {
-          boardCells[i].textContent = gameLogic.play();
-          gameLogic.gameBoard[i] = boardCells[i].textContent;
-          if (gameLogic.checkCell(i)) {
-            console.log("end");
+          boardCells[i].textContent = turns();
+          gamelogic.gameBoard[i] = boardCells[i].textContent;
+          if (gamelogic.checkCell(i)) {
+            terminate();
           }
         }
       });
     }
   }
+  function terminate() {
+    boardCells.forEach((x) => {
+      x.textContent = "";
+    });
+  }
+  function turns() {
+    if (countTurn == 0) {
+      countTurn--;
+      return "X";
+    } else {
+      countTurn++;
+      return "O";
+    }
+  }
   return {
-    start() {
-      addLogicInDOM();
+    addLogicInDOM,
+  };
+}
+
+function GameLogic() {
+  let playerX = Player("X");
+  let playerO = Player("O");
+  let drawCount = 0;
+  let gameBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let maxTurns = 9;
+  let drawSpan = document.getElementById("draw");
+  function terminate() {
+    for (let i = 0; i < 9; i++) {
+      gameBoard[i] = i;
+    }
+    maxTurns = 9;
+  }
+  function win(marker) {
+    switch (marker) {
+      case "X":
+        playerX.win();
+        break;
+      case "O":
+        playerO.win();
+        break;
+      case "D":
+        drawCount++;
+        drawSpan.textContent = "Draw: " + drawCount;
+        break;
+    }
+  }
+  return {
+    gameBoard,
+    checkCell(i) {
+      maxTurns--;
+      if (maxTurns == 0) {
+        win("D");
+        terminate();
+        return true;
+      }
+      const winningConditions = [
+        [0, 1, 2],
+        [0, 3, 6],
+        [0, 4, 8],
+        [2, 4, 6],
+        [3, 4, 5],
+        [6, 7, 8],
+        [1, 4, 7],
+      ];
+      for (const condition of winningConditions) {
+        const [a, b, c] = condition;
+        if (gameBoard[a] == gameBoard[b] && gameBoard[b] == gameBoard[c]) {
+          win(gameBoard[i]);
+          terminate();
+          return true;
+        }
+      }
     },
   };
-})();
-domLogic.start();
+}
+let game = DomLogic();
+game.addLogicInDOM();
