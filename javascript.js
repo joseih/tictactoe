@@ -1,162 +1,81 @@
 function Player(marker) {
   let score = 0;
   return {
-    play() {
-      let index = parseInt(prompt("index: "));
-      return index;
-    },
     win() {
       score++;
+      this.showScore();
     },
     showScore() {
-      return score;
+      console.log(`${marker}: ${score}`);
     },
     marker() {
       return marker;
     },
   };
 }
-function GameBoard() {
-  let gameboard = [];
+function GameLogic() {
+  let playerX = Player("X");
+  let playerO = Player("O");
+  let gameBoard = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let turnn = 0;
+  function win(marker) {
+    if (marker == "X") {
+      playerX.win();
+      return true;
+    } else if (marker == "O") {
+      playerO.win();
+      return true;
+    }
+  }
   return {
-    turn(marker, index) {
-      if (gameboard[index] == "_") {
-        gameboard[index] = marker;
-        this.showBoard();
+    gameBoard,
+    play() {
+      if (turnn == 0) {
+        turnn--;
+        return playerX.marker();
       } else {
-        console.log("Invalid Play");
+        turnn++;
+        return playerO.marker();
       }
     },
-    checkCells() {
-      for (let i = 0; i < gameboard.length; i++) {
-        switch (i) {
-          case 0:
-            if (gameboard[0] == gameboard[1] && gameboard[1] == gameboard[2]) {
-              return gameboard[i];
-            } else if (
-              gameboard[0] == gameboard[3] &&
-              gameboard[3] == gameboard[6]
-            ) {
-              return gameboard[i];
-            } else if (
-              gameboard[0] == gameboard[4] &&
-              gameboard[4] == gameboard[8]
-            ) {
-              return gameboard[i];
-            }
-            break;
-          case 1:
-            if (gameboard[1] == gameboard[4] && gameboard[4] == gameboard[7]) {
-              return gameboard[i];
-            }
-            break;
-          case 2:
-            if (gameboard[2] == gameboard[5] && gameboard[5] == gameboard[8]) {
-              return gameboard[i];
-            }
-            break;
-          case 3:
-            if (gameboard[3] == gameboard[4] && gameboard[4] == gameboard[5]) {
-              return gameboard[i];
-            }
-            break;
-          case 6:
-            if (gameboard[6] == gameboard[7] && gameboard[7] == gameboard[8]) {
-              return gameboard[i];
-            }
-            break;
-          default:
-            break;
-        }
-      }
-      let draw = gameboard.findIndex((x) => {
-        if (x == "_") {
-          return true;
-        }
-      });
-      if (draw == -1) {
-        return "D";
-      }
-    },
-    showBoard() {
-      let firstLine = "| ",
-        secondLine = "| ",
-        thirdLine = "| ";
-      for (let i = 0; i < 3; i++) {
-        firstLine += gameboard[i] + " | ";
-      }
-      for (let i = 3; i < 6; i++) {
-        secondLine += gameboard[i] + " | ";
-      }
-      for (let i = 6; i < 9; i++) {
-        thirdLine += gameboard[i] + " | ";
-      }
-      console.clear();
-      console.log(firstLine);
-      console.log(secondLine);
-      console.log(thirdLine);
-    },
-    cleanBoard() {
-      for (let i = 0; i < 9; i++) {
-        gameboard[i] = "_";
+    checkCell(i) {
+      if (gameBoard[0] == gameBoard[1] && gameBoard[1] == gameBoard[2]) {
+        return win(gameBoard[i]);
+      } else if (gameBoard[0] == gameBoard[4] && gameBoard[4] == gameBoard[8]) {
+        return win(gameBoard[i]);
+      } else if (gameBoard[0] == gameBoard[3] && gameBoard[3] == gameBoard[6]) {
+        return win(gameBoard[i]);
+      } else if (gameBoard[3] == gameBoard[4] && gameBoard[4] == gameBoard[5]) {
+        return win(gameBoard[i]);
+      } else if (gameBoard[6] == gameBoard[7] && gameBoard[7] == gameBoard[8]) {
+        return win(gameBoard[i]);
+      } else if (gameBoard[2] == gameBoard[4] && gameBoard[4] == gameBoard[6]) {
+        return win(gameBoard[i]);
       }
     },
   };
 }
 
-let gamelogic = (() => {
-  let gameboard = GameBoard();
-  let playerX = Player("X");
-  let playerO = Player("O");
-  function checkForWin() {
-    let winPlayer = gameboard.checkCells();
-    if (winPlayer != undefined || winPlayer != "_") {
-      switch (winPlayer) {
-        case "X":
-          playerX.win();
-          console.log(`Win of: ${playerX.marker()}`);
-          console.log(`Score: ${playerX.showScore()}`);
-          return false;
-        case "O":
-          playerO.win();
-          console.log(`Win of: ${playerO.marker()}`);
-          console.log(`Score: ${playerO.showScore()}`);
-          return false;
-        case "D":
-          console.log("Draw!");
-          return false;
-        default:
-          return true;
-      }
+let domLogic = (() => {
+  let boardCells = document.querySelectorAll(".gameboard-cell");
+  let gameLogic = GameLogic();
+  function addLogicInDOM() {
+    for (let i = 0; i < 9; i++) {
+      boardCells[i].addEventListener("click", () => {
+        if (boardCells[i].textContent == "") {
+          boardCells[i].textContent = gameLogic.play();
+          gameLogic.gameBoard[i] = boardCells[i].textContent;
+          if (gameLogic.checkCell(i)) {
+            console.log("end");
+          }
+        }
+      });
     }
   }
   return {
     start() {
-      gameboard.cleanBoard();
-      let turn = 0;
-      do {
-        if (turn == 0) {
-          gameboard.turn(playerX.marker(), playerX.play());
-          turn--;
-        } else {
-          gameboard.turn(playerO.marker(), playerO.play());
-          turn++;
-        }
-      } while (checkForWin());
+      addLogicInDOM();
     },
   };
 })();
-const button = document.getElementById("play");
-button.addEventListener("click", gamelogic.start);
-let gameboard = [];
-for (let i = 0; i < 9; i++) {
-  gameboard[i] = "_";
-}
-
-console.log(
-  gameboard.findIndex((x) => {
-    if (x == "_") {
-      return true;
-    }
-  })
-);
+domLogic.start();

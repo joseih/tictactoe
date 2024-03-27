@@ -1,0 +1,35 @@
+@font-face {
+  font-family: Roboto;
+  src: url(fonts/Roboto-Regular.woff2);
+}
+
+body {
+  background-color: rgb(20, 189, 172);
+  font-family: Roboto;
+}
+div {
+}
+#container {
+  height: 97vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#gameboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.gameboard-cell {
+  width: 150px;
+  height: 150px;
+  border: 5px solid darkcyan;
+  color: grey;
+  font-size: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.gameboard-cell:hover {
+  background-color: cornsilk;
+  cursor: pointer;
+}
